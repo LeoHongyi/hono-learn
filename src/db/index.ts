@@ -26,13 +26,13 @@ async function getConnectionString(): Promise<string> {
   );
   const secret = JSON.parse(resp.SecretString!);
 
-  return `postgresql://${secret.username}:${secret.password}@${secret.host}:${secret.port}/${secret.dbname}`;
+  return `postgresql://${secret.username}:${secret.password}@${secret.host}:${secret.port}/${secret.dbname}?sslmode=require`;
 }
 
 export async function getDb() {
   if (!pool) {
     const connectionString = await getConnectionString();
-    pool = new Pool({ connectionString, max: 5 });
+    pool = new Pool({ connectionString, max: 5, ssl: { rejectUnauthorized: false } });
   }
   return drizzle(pool, { schema });
 }

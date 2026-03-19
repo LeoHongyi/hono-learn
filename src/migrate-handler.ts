@@ -51,7 +51,7 @@ export async function handler(event: any) {
       password: secret.password,
       database: secret.dbname,
       max: 1,
-      ssl: false,
+      ssl: { rejectUnauthorized: false },
     });
 
     // Create migrations tracking table
