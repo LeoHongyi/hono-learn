@@ -60,8 +60,12 @@ export async function handler(event: any) {
       max: 1,
       ssl: false,
     });
+
     const db = drizzle(pool);
-    await migrate(db, { migrationsFolder: "./drizzle" });
+    await migrate(db, {
+      migrationsFolder: "./drizzle",
+      migrationsSchema: "public",
+    });
     await pool.end();
     console.log("Migration complete");
     await sendResponse(event, "SUCCESS");
