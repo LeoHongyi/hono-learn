@@ -43,8 +43,23 @@ export async function handler(event: any) {
   }
 
   try {
-    const connectionString = await getConnectionString();
-    const pool = new Pool({ connectionString, max: 1 });
+    const secretArn = process.env.DB_SECRET_ARN!;
+    const smClient = new SecretsManagerClient({});
+    const resp = await smClient.send(
+      new GetSecretValueCommand({ SecretId: secretArn })
+    );
+    const secret = JSON.parse(resp.SecretString!);
+    console.log("Connecting to DB at", secret.host, secret.port, secret.dbname);
+
+    const pool = new Pool({
+      host: secret.host,
+      port: Number(secret.port),
+      user: secret.username,
+      password: secret.password,
+      database: secret.dbname,
+      max: 1,
+      ssl: false,
+    });
     const db = drizzle(pool);
     await migrate(db, { migrationsFolder: "./drizzle" });
     await pool.end();
@@ -52,6 +67,6 @@ export async function handler(event: any) {
     await sendResponse(event, "SUCCESS");
   } catch (err: any) {
     console.error("Migration failed:", err);
-    await sendResponse(event, "FAILED", err.message);
+    await sendResponse(event, "FAILED", `Failed ${err.query || 'migration'}: ${err.message}`);
   }
 }
