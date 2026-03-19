@@ -1,0 +1,12 @@
+version = 0.1
+
+[default.deploy.parameters]
+stack_name = "hono-learn"
+resolve_s3 = true
+s3_prefix = "hono-learn"
+region = "ap-northeast-1"
+capabilities = "CAPABILITY_IAM CAPABILITY_AUTO_EXPAND"
+confirm_changeset = true
+
+[default.build.parameters]
+use_container = false
