@@ -1,5 +1,5 @@
 import { build } from "esbuild";
-import { cpSync } from "fs";
+import { cpSync, writeFileSync, mkdirSync } from "fs";
 
 const shared = {
   bundle: true,
@@ -29,5 +29,10 @@ await Promise.all([
 
 // Copy drizzle migration files for the migrate Lambda
 cpSync("drizzle", "dist/migrate/drizzle", { recursive: true });
+
+// Write package.json with "type":"module" so Lambda resolves .mjs handlers
+const pkg = JSON.stringify({ type: "module" });
+writeFileSync("dist/package.json", pkg);
+writeFileSync("dist/migrate/package.json", pkg);
 
 console.log("Build complete: dist/index.mjs, dist/migrate/index.mjs");

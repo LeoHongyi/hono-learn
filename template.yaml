@@ -200,7 +200,6 @@ Resources:
     Properties:
       Handler: index.handler
       CodeUri: dist/
-      AutoPublishAlias: live
       Architectures:
         - arm64
       VpcConfig:
@@ -234,20 +233,14 @@ Resources:
             Path: /
             Method: GET
 
-  HttpApi:
-    Type: AWS::Serverless::HttpApi
-    Properties:
-      StageName: "$default"
-
-  # ============ DB Migration (Custom Resource) ============
-  MigrateFunction:
+  # ============ Migration Lambda ============
+  MigrationFunction:
     Type: AWS::Serverless::Function
-    DependsOn: DBSecretAttachment
     Properties:
       Handler: index.handler
       CodeUri: dist/migrate/
       Timeout: 120
-      MemorySize: 256
+      MemorySize: 512
       Architectures:
         - arm64
       VpcConfig:
@@ -259,7 +252,6 @@ Resources:
       Environment:
         Variables:
           DB_SECRET_ARN: !Ref DBSecret
-          NODE_OPTIONS: "--enable-source-maps"
       Policies:
         - VPCAccessPolicy: {}
         - Statement:
@@ -271,14 +263,16 @@ Resources:
   RunMigration:
     Type: Custom::Migration
     DependsOn:
-      - RDSInstance
       - DBSecretAttachment
-      - NatGateway
       - PrivateRoute
     Properties:
-      ServiceToken: !GetAtt MigrateFunction.Arn
-      # Trigger re-run on each deploy
+      ServiceToken: !GetAtt MigrationFunction.Arn
       Version: !Ref MigrationVersion
+
+  HttpApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: "$default"
 
 Outputs:
   ApiUrl:

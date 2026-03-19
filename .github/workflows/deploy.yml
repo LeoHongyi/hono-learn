@@ -37,12 +37,10 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: SAM build
-        run: sam build
-
       - name: SAM deploy
         run: |
           sam deploy \
+            --template-file template.yaml \
             --stack-name ${{ env.STACK_NAME }} \
             --region ${{ env.AWS_REGION }} \
             --capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND \
@@ -52,6 +50,7 @@ jobs:
             --parameter-overrides "MigrationVersion=${{ github.sha }}"
 
       - name: Print API URL
+        if: success()
         run: |
           API_URL=$(aws cloudformation describe-stacks \
             --stack-name ${{ env.STACK_NAME }} \
