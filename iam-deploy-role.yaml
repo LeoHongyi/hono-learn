@@ -85,6 +85,13 @@ Resources:
                 Action:
                   - secretsmanager:*
                 Resource: "*"
+              # Service Linked Roles (needed for RDS, ELB, etc.)
+              - Effect: Allow
+                Action:
+                  - iam:CreateServiceLinkedRole
+                  - iam:DeleteServiceLinkedRole
+                  - iam:GetServiceLinkedRoleDeletionStatus
+                Resource: "arn:aws:iam::*:role/aws-service-role/*"
 
 Outputs:
   DeployRoleArn:
