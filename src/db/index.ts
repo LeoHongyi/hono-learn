@@ -26,7 +26,7 @@ async function getConnectionString(): Promise<string> {
   );
   const secret = JSON.parse(resp.SecretString!);
 
-  return `postgresql://${secret.username}:${secret.password}@${secret.host}:${secret.port}/${secret.dbname}?sslmode=require`;
+  return `postgresql://${secret.username}:${secret.password}@${secret.host}:${secret.port}/${secret.dbname}`;
 }
 
 export async function getDb() {
